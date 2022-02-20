@@ -1,4 +1,5 @@
 import { CopyIcon, CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
+import { Frame, Line } from 'scintilla';
 import {
   Button,
   Code,
@@ -113,6 +114,9 @@ const Hosts = ({
                   {node.address ? <CheckCircleIcon /> : <WarningIcon />}{' '}
                   <Text mx="2">Host</Text>
                   {node.index + 1}
+                  <Tag mx="2" colorScheme="yellow">
+                    {domain}
+                  </Tag>
                 </Flex>
               </Td>
               <Td>
@@ -140,7 +144,7 @@ const Hosts = ({
                 </Code>
               </Td>
               <Td>
-                <Tag colorScheme="yellow">{domain}</Tag>
+                <RedLine />
               </Td>
             </Tr>
             <Tr>
@@ -171,6 +175,36 @@ const Hosts = ({
     </Tbody>
   </Table>
 );
+
+const RedLine = () => {
+  const [demoUptime, setDemoUptime] = useState<number[]>([0]);
+  useEffect(() => {
+    const timeout = setTimeout(async () => {
+      setDemoUptime((prevUptime) => {
+        const limitedArray =
+          prevUptime.length > 10 ? prevUptime.slice(1) : prevUptime;
+        return [...limitedArray, Math.random() * 10];
+      });
+    }, 1000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [demoUptime]);
+  return (
+    <div style={{ width: '200px' }}>
+      <Frame>
+        <Line
+          data={demoUptime}
+          stroke={{
+            color: { solid: [255, 0, 0, 1] },
+            width: 2,
+            style: 'solid',
+          }}
+        />
+      </Frame>
+    </div>
+  );
+};
 
 function App() {
   const [host, setHost] = useState('');

@@ -61,6 +61,18 @@ export const getChannels = (baseUrl: string, headers: Headers) =>
 export const getInfo = (baseUrl: string, headers: Headers) =>
   nonJsonApi(baseUrl, headers, '/api/v2/node/info', Promise.resolve({}));
 
+export const getUptime = async (baseUrl: string) => {
+  const start = performance.now();
+  await nonJsonApi(
+    baseUrl,
+    {} as Headers,
+    'healthcheck/v1/version',
+    Promise.resolve('')
+  );
+  const end = performance.now();
+  return start - end;
+};
+
 export const getTickets = (baseUrl: string, headers: Headers) =>
   nonJsonApi(
     baseUrl,
