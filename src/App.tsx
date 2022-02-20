@@ -4,6 +4,8 @@ import {
   Button,
   Code,
   Input,
+  InputGroup,
+  Box,
   Table,
   TableCaption,
   Tag,
@@ -40,6 +42,7 @@ const parseEther = (value: string) =>
 type Host = {
   url: URL;
   domain: string;
+  token: string;
 };
 
 type Balance = {
@@ -216,8 +219,8 @@ const Hosts = ({
 function App() {
   const [host, setHost] = useState('');
   const [hosts, setHosts] = useState<{ [key: string]: Host }>({});
-  const [uptimes, setUptimes] = useState<{ [key: string]: number[] }>({});
   const [nodes, setNodes] = useState<Nodes>({});
+  const [customToken, setCustomToken] = useState<string>('');
 
   const getHeaders = (securityToken: string, isPost = false) => {
     const headers = new Headers();
@@ -229,16 +232,13 @@ function App() {
     return headers;
   };
 
-  const loadGitpodHosts = async (gitpodURL: URL) => {
-    const NODES = 5;
-    const DEFAULT_SECURITY_TOKEN = '^^LOCAL-testing-123^^';
-    const BASE_HTTP = (index: number) =>
-      `https://1330${index}-${gitpodURL.hostname}`;
-    const BASE_WS = (index: number) =>
-      `wss://1950${index}-${gitpodURL.hostname}`;
-    const BASE_HC = (index: number) =>
-      `https://1808${index}-${gitpodURL.hostname}`;
-
+  const loadHosts = async (
+    NODES: number,
+    DEFAULT_SECURITY_TOKEN: string,
+    BASE_HTTP: (index: number) => string,
+    BASE_WS: (index: number) => string,
+    BASE_HC: (index: number) => string
+  ) => {
     return await Promise.all(
       [...Array(NODES)].map(async (_, index) => {
         const headers = getHeaders(DEFAULT_SECURITY_TOKEN);
@@ -273,6 +273,38 @@ function App() {
     );
   };
 
+  const loadGitpodHosts = async (url: URL) => {
+    const NODES = 5;
+    const DEFAULT_SECURITY_TOKEN = '^^LOCAL-testing-123^^';
+    const BASE_HTTP = (index: number) => `https://1330${index}-${url.hostname}`;
+    const BASE_WS = (index: number) => `wss://1950${index}-${url.hostname}`;
+    const BASE_HC = (index: number) => `https://1808${index}-${url.hostname}`;
+
+    return loadHosts(
+      NODES,
+      DEFAULT_SECURITY_TOKEN,
+      BASE_HTTP,
+      BASE_WS,
+      BASE_HC
+    );
+  };
+
+  const loadCustomHosts = async (url: URL, customToken: string) => {
+    const NODES = 1;
+    const DEFAULT_SECURITY_TOKEN = customToken;
+    const BASE_HTTP = (index: number) => `http://${url.hostname}:3001`;
+    const BASE_WS = (index: number) => `ws://${url.hostname}:3000`;
+    const BASE_HC = (index: number) => `http://${url.hostname}:8080`;
+
+    return loadHosts(
+      NODES,
+      DEFAULT_SECURITY_TOKEN,
+      BASE_HTTP,
+      BASE_WS,
+      BASE_HC
+    );
+  };
+
   useEffect(() => {
     const loadNodesFromHosts = async () => {
       Object.keys(hosts).map(async (host) => {
@@ -280,6 +312,10 @@ function App() {
           case 'gitpod.io':
             const gitpodNodes = await loadGitpodHosts(hosts[host].url);
             setNodes((prevNodes) => ({ [host]: gitpodNodes, ...prevNodes }));
+            break;
+          default:
+            const nodes = await loadCustomHosts(hosts[host].url, customToken);
+            setNodes((prevNodes) => ({ [host]: nodes, ...prevNodes }));
             break;
         }
       });
@@ -292,7 +328,10 @@ function App() {
       try {
         const url = new URL(host);
         const domain = url.hostname.split('.').slice(-2).join('.');
-        setHosts((prevHosts) => ({ [host]: { url, domain }, ...prevHosts }));
+        setHosts((prevHosts) => ({
+          [host]: { url, domain, token: customToken },
+          ...prevHosts,
+        }));
       } catch (err) {}
     }
   };
@@ -401,12 +440,21 @@ function App() {
           </Tr>
         </Tbody>
       </Table>
-      <Input
-        placeholder="node host e.g. https://hoprnet-hoprnet-j4zbg3yajqp.ws-eu31.gitpod.io/ or localhost"
-        value={host}
-        onChange={(e) => setHost(e.target.value)}
-        onKeyPress={enterNode}
-      />
+      <Box>
+        <InputGroup>
+          <Input
+            placeholder="node host e.g. https://hoprnet-hoprnet-j4zbg3yajqp.ws-eu31.gitpod.io/ or localhost"
+            value={host}
+            onChange={(e) => setHost(e.target.value)}
+            onKeyPress={enterNode}
+          />
+          <Input
+            placeholder="^^LOCAL-testing-123^^"
+            value={customToken}
+            onChange={(e) => setCustomToken(e.target.value)}
+          />
+        </InputGroup>
+      </Box>
     </>
   );
 }
