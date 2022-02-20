@@ -28,6 +28,7 @@ import {
   getNativeBalance,
   getTickets,
   getVersion,
+  getUptime,
 } from './api';
 
 const truncate = (str: string, chars = 10) =>
@@ -55,6 +56,7 @@ type Node = {
   address: Address;
   balance: Balance;
   version: string;
+  uptimer: () => Promise<number>;
   info?: any;
   channels?: any;
   tickets?: any;
@@ -86,6 +88,41 @@ const EndpointButton = ({
     >
       {hasCopied ? `Copied ${label}` : label}
     </Button>
+  );
+};
+
+const RedLine = ({
+  uptimer,
+}: {
+  uptimer?: () => Promise<number> | undefined;
+}) => {
+  const [demoUptime, setDemoUptime] = useState<number[]>([0]);
+  useEffect(() => {
+    const timeout = setTimeout(async () => {
+      const uptime = uptimer ? await uptimer() : Math.random() * 10;
+      setDemoUptime((prevUptime) => {
+        const limitedArray =
+          prevUptime.length > 10 ? prevUptime.slice(1) : prevUptime;
+        return [...limitedArray, uptime];
+      });
+    }, 1000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [demoUptime]);
+  return (
+    <div style={{ width: '200px' }}>
+      <Frame>
+        <Line
+          data={demoUptime}
+          stroke={{
+            color: { solid: [255, 0, 0, 1] },
+            width: 2,
+            style: 'solid',
+          }}
+        />
+      </Frame>
+    </div>
   );
 };
 
@@ -144,7 +181,7 @@ const Hosts = ({
                 </Code>
               </Td>
               <Td>
-                <RedLine />
+                <RedLine uptimer={node.uptimer} />
               </Td>
             </Tr>
             <Tr>
@@ -176,39 +213,10 @@ const Hosts = ({
   </Table>
 );
 
-const RedLine = () => {
-  const [demoUptime, setDemoUptime] = useState<number[]>([0]);
-  useEffect(() => {
-    const timeout = setTimeout(async () => {
-      setDemoUptime((prevUptime) => {
-        const limitedArray =
-          prevUptime.length > 10 ? prevUptime.slice(1) : prevUptime;
-        return [...limitedArray, Math.random() * 10];
-      });
-    }, 1000);
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [demoUptime]);
-  return (
-    <div style={{ width: '200px' }}>
-      <Frame>
-        <Line
-          data={demoUptime}
-          stroke={{
-            color: { solid: [255, 0, 0, 1] },
-            width: 2,
-            style: 'solid',
-          }}
-        />
-      </Frame>
-    </div>
-  );
-};
-
 function App() {
   const [host, setHost] = useState('');
   const [hosts, setHosts] = useState<{ [key: string]: Host }>({});
+  const [uptimes, setUptimes] = useState<{ [key: string]: number[] }>({});
   const [nodes, setNodes] = useState<Nodes>({});
 
   const getHeaders = (securityToken: string, isPost = false) => {
@@ -228,6 +236,8 @@ function App() {
       `https://1330${index}-${gitpodURL.hostname}`;
     const BASE_WS = (index: number) =>
       `wss://1950${index}-${gitpodURL.hostname}`;
+    const BASE_HC = (index: number) =>
+      `https://1808${index}-${gitpodURL.hostname}`;
 
     return await Promise.all(
       [...Array(NODES)].map(async (_, index) => {
@@ -243,6 +253,7 @@ function App() {
           headers
         );
         const version = await getVersion(BASE_HTTP(index + 1), headers);
+        const uptimer = () => getUptime(BASE_HC(index + 1));
         const info = await getInfo(BASE_HTTP(index + 1), headers);
         const channels = await getChannels(BASE_HTTP(index + 1), headers);
         const tickets = await getTickets(BASE_HTTP(index + 1), headers);
@@ -250,6 +261,7 @@ function App() {
           index,
           address: { hopr: hoprAddress, native: nativeAddress },
           version,
+          uptimer: uptimer,
           info,
           channels,
           tickets,

@@ -63,14 +63,13 @@ export const getInfo = (baseUrl: string, headers: Headers) =>
 
 export const getUptime = async (baseUrl: string) => {
   const start = performance.now();
-  await nonJsonApi(
-    baseUrl,
-    {} as Headers,
-    'healthcheck/v1/version',
-    Promise.resolve('')
-  );
+  const version = await (
+    await fetch(`${baseUrl}/healthcheck/v1/version`).catch((err) => ({
+      text: () => Promise.resolve(0),
+    }))
+  ).text();
   const end = performance.now();
-  return start - end;
+  return version ? end - start : 0;
 };
 
 export const getTickets = (baseUrl: string, headers: Headers) =>
