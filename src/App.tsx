@@ -97,7 +97,7 @@ const EndpointButton = ({
 const RedLine = ({
   uptimer,
 }: {
-  uptimer?: () => Promise<number> | undefined;
+  uptimer?: () => Promise<number>;
 }) => {
   const [demoUptime, setDemoUptime] = useState<number[]>([0]);
   useEffect(() => {
@@ -289,6 +289,22 @@ function App() {
     );
   };
 
+  const loadLocalHosts = async (url: URL) => {
+    const NODES = 5;
+    const DEFAULT_SECURITY_TOKEN = '^^LOCAL-testing-123^^';
+    const BASE_HTTP = (index: number) => `http://${url.hostname}:1330${index}`;
+    const BASE_WS = (index: number) => `ws://${url.hostname}:1950${index}`;
+    const BASE_HC = (index: number) => `http://${url.hostname}:1808${index}`;
+
+    return loadHosts(
+      NODES,
+      DEFAULT_SECURITY_TOKEN,
+      BASE_HTTP,
+      BASE_WS,
+      BASE_HC
+    );
+  }
+
   const loadCustomHosts = async (url: URL, customToken: string) => {
     const NODES = 1;
     const DEFAULT_SECURITY_TOKEN = customToken;
@@ -312,6 +328,10 @@ function App() {
           case 'gitpod.io':
             const gitpodNodes = await loadGitpodHosts(hosts[host].url);
             setNodes((prevNodes) => ({ [host]: gitpodNodes, ...prevNodes }));
+            break;
+          case 'localhost':
+            const localNodes = await loadLocalHosts(hosts[host].url);
+            setNodes((prevNodes) => ({ [host]: localNodes, ...prevNodes }));
             break;
           default:
             const nodes = await loadCustomHosts(hosts[host].url, customToken);
@@ -400,6 +420,7 @@ function App() {
               rejectedValue: 'string',
             },
             version: '1.87.x',
+            uptimer: () => Promise.resolve(Math.random() * 10),
             httpEndpoint: 'http://localhost:3001',
             wsEndpoint: 'ws//localhost:3000',
             address: {
