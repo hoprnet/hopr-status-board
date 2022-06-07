@@ -32,6 +32,7 @@ import {
   getVersion,
   getUptime,
 } from './api';
+import WebSocketHandler from './WebSocketHandler';
 
 const truncate = (str: string, chars = 10) =>
   str.substr(0, chars) + '...' + str.substr(str.length - chars, chars);
@@ -62,6 +63,7 @@ type Node = {
   info?: any;
   channels?: any;
   tickets?: any;
+  securityToken?: string;
 };
 
 type Nodes = { [key: string]: Node[] };
@@ -186,18 +188,22 @@ const Hosts = ({
               </Td>
             </Tr>
             <Tr>
-              <Th colSpan={2}>General</Th>
+              <Th>General</Th>
+              <Th>Messages</Th>
               <Th>Info</Th>
               <Th>Channels</Th>
               <Th>Tickets</Th>
             </Tr>
             <Tr>
-              <Td colSpan={2}>
+              <Td>
                 <Code>Balance</Code>:{parseEther(node.balance.hopr)} HOPR,{' '}
                 {parseEther(node.balance.native)} ETH
                 <br />
                 <Code>Version</Code>:{node.version}
               </Td>
+              <td>
+                <WebSocketHandler wsEndpoint={`${node.httpEndpoint}/api/v2/messages/websocket`} securityToken={node.securityToken || ''} />
+              </td>
               <Td>
                 <ReactJson src={node.info} collapsed />
               </Td>
@@ -266,7 +272,7 @@ function App() {
           tickets,
           balance: { hopr: hoprBalance, native: nativeBalance },
           httpEndpoint: BASE_HTTP(index + 1),
-          wsEndpoint: BASE_WS(index + 1),
+          securityToken: DEFAULT_SECURITY_TOKEN,
         };
       })
     );
