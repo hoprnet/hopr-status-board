@@ -224,7 +224,7 @@ function App() {
 
   const params = new URLSearchParams(window.location.search)
 
-  const [host, setHost] = useState(params.get('nodehHost') || '');
+  const [host, setHost] = useState(params.get('nodeHost') || '');
   const [hosts, setHosts] = useState<{ [key: string]: Host }>({});
   const [nodes, setNodes] = useState<Nodes>({});
   const [customToken, setCustomToken] = useState<string>(params.get('securityToken') || '');
