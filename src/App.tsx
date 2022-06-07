@@ -215,10 +215,13 @@ const Hosts = ({
 );
 
 function App() {
-  const [host, setHost] = useState('');
+
+  const params = new URLSearchParams(window.location.search)
+
+  const [host, setHost] = useState(params.get('nodehHost') || '');
   const [hosts, setHosts] = useState<{ [key: string]: Host }>({});
   const [nodes, setNodes] = useState<Nodes>({});
-  const [customToken, setCustomToken] = useState<string>('');
+  const [customToken, setCustomToken] = useState<string>(params.get('securityToken') || '');
 
   const getHeaders = (securityToken: string, isPost = false) => {
     const headers = new Headers();
