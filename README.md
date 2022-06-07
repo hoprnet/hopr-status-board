@@ -33,7 +33,7 @@ Once the application launches in your browser set a `nodeHost` and press `enter`
 
 You an also pass it as url params.
 
-- **nodeHost**: Use `gp url 13301` to get a node endpoint and then remove the port number in the url  e.g. https://hoprnet-hoprstatusboard-9s40xydfvct.ws-us46.gitpod.io
+- **nodeHost**: Use `gp url` to get it. e.g. https://hoprnet-hoprstatusboard-9s40xydfvct.ws-us46.gitpod.io
 - **securityToken**: Use `^^LOCAL-testing-123^^` as a development API Token.
 
 

@@ -9,7 +9,7 @@ tasks:
       yarn
     command: |
       echo '🦄 Running Status Board application'
-      yarn start 
+      yarn dev 
     ## HOPR net repositories
   - name: (HOPRd) Installing hoprnet which contains the required scripts
     command: |
@@ -22,9 +22,9 @@ tasks:
       echo '🟡 📦 Building latest version of hoprnet monorepo'
       yarn build
       echo '🟡 Waiting for StatusBoard'
-      gp await-port 8080
+      gp await-port 3000
       echo '🟡 Running HOPR nodes and topology'
-      ./scripts/setup-local-cluster.sh -m "$(gp url 8080)" -i scripts/topologies/full_interconnected_cluster.sh
+      ./scripts/setup-local-cluster.sh -m "$(gp url 3000)" -i scripts/topologies/full_interconnected_cluster.sh
     openMode: split-right
   - name: (StatusBoard) URLs
     command: |
@@ -37,34 +37,34 @@ tasks:
       echo '🚦 Nodes Dashboard'
       echo -e "\n"
       echo -e "\t1️⃣  Alex"
-      echo -e "\t\tStatusBoard: $(gp url 8080)/?apiEndpoint=$(gp url 13301)&securityToken=^^LOCAL-testing-123^^"
+      echo -e "\t\tStatusBoard: $(gp url 3000)/?apiEndpoint=$(gp url)&securityToken=^^LOCAL-testing-123^^"
       echo -e "\t\tHopr API:\t$(gp url 13301)/api/v2/_swagger"
       echo -e "\t\tAdmin UI:\t$(gp url 19501)/"
       echo -e "\n"
       echo -e "\t2️⃣  Betty"
-      echo -e "\t\tStatusBoard: $(gp url 8080)/?apiEndpoint=$(gp url 13302)&securityToken=^^LOCAL-testing-123^^"
+      echo -e "\t\tStatusBoard: $(gp url 3000)/?apiEndpoint=$(gp url)&securityToken=^^LOCAL-testing-123^^"
       echo -e "\t\tHopr API:\t$(gp url 13302)/api/v2/_swagger"
       echo -e "\t\tAdmin UI:\t$(gp url 19502)/"
       echo -e "\n"
       echo -e "\t3️⃣  Chão"
-      echo -e "\t\tStatusBoard: $(gp url 8080)/?apiEndpoint=$(gp url 13303)&securityToken=^^LOCAL-testing-123^^"
+      echo -e "\t\tStatusBoard: $(gp url 3000)/?apiEndpoint=$(gp url)&securityToken=^^LOCAL-testing-123^^"
       echo -e "\t\tHopr API:\t$(gp url 13303)/api/v2/_swagger"
       echo -e "\t\tAdmin UI:\t$(gp url 19503)/"
       echo -e "\n"
       echo -e "\t4️⃣  Dmytro"
-      echo -e "\t\tStatusBoard: $(gp url 8080)/?apiEndpoint=$(gp url 13304)&securityToken=^^LOCAL-testing-123^^"
+      echo -e "\t\tStatusBoard: $(gp url 3000)/?apiEndpoint=$(gp url)&securityToken=^^LOCAL-testing-123^^"
       echo -e "\t\tHopr API:\t$(gp url 13304)/api/v2/_swagger"
       echo -e "\t\tAdmin UI:\t$(gp url 19504)/"
       echo -e "\n"
       echo -e "\t5️⃣  Zoe"
-      echo -e "\t\tStatusBoard: $(gp url 8080)/?apiEndpoint=$(gp url 13305)&securityToken=^^LOCAL-testing-123^^"
+      echo -e "\t\tStatusBoard: $(gp url 3000)/?apiEndpoint=$(gp url)&securityToken=^^LOCAL-testing-123^^"
       echo -e "\t\tHopr API:\t$(gp url 13305)/api/v2/_swagger"
       echo -e "\t\tAdmin UI:\t$(gp url 19505)/"
     openMode: tab-after
 
 ports:
   - name: StatusBoard
-    port: 8080
+    port: 3000
     visibility: public
   - name: HOPRd REST API
     port: 13301-13305
